@@ -7,20 +7,20 @@ public class JobConf {
     public String JobMasterID;
     public String JobMasterJob;
     public Class<? extends Mapper> MapFunc;
-    public Object ReduceFunc;
+    public Class<? extends Reducer> ReduceFunc;
 
 
     public JobConf(String JobMasterID, String JobMasterJob){
-        JobMasterID = JobMasterID;
-        JobMasterJob = JobMasterJob;
+        this.JobMasterID = JobMasterID;
+        this.JobMasterJob = JobMasterJob;
     }
 
-    public void setMapper(Class <? extends Mapper> MyMapFunc) throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
-        MapFunc = MyMapFunc;
+    public void setMapper(Class <? extends Mapper> MyMapFunc) {
+        this.MapFunc = MyMapFunc;
     }
 
     public void setReducer (Class <? extends Reducer> ReduceFunc){
-        ReduceFunc = ReduceFunc;
+        this.ReduceFunc = ReduceFunc;
     }
 
 }

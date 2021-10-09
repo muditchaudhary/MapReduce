@@ -1,30 +1,43 @@
 package com.mapreduce;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.Random;
 import java.util.UUID;
 
 public class Master {
     String MasterID;
+    JobConf jobConfig;
 
     public Master(String MasterID){
-        MasterID = MasterID;
+        this.MasterID = MasterID;
     }
 
-    public void runJob(JobConf jobConfig) throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
-        Class<?> MapCls = jobConfig.MapFunc.getClass();
-        Method method = MapCls.getMethod("Map");
-        method.invoke(jobConfig.MapFunc);
+    public void setJobConfig(JobConf jobConfig){
+        this.jobConfig = jobConfig;
     }
 
-    public void createMapper(JobConf jobConfig) throws InstantiationException, IllegalAccessException, InvocationTargetException, NoSuchMethodException {
-        Class <?> MapperCls = jobConfig.MapFunc;
-        byte[] array = new byte[7]; // length is bounded by 7
-        new Random().nextBytes(array);
+    public void runJob() throws NoSuchMethodException, InvocationTargetException, IllegalAccessException, InstantiationException {
+        Object mapper = createMapper();
+        Method mapperMethod = this.jobConfig.MapFunc.getMethod("Map");
+        mapperMethod.invoke(mapper);
+
+        Object reducer = createReducer();
+        Method reducerMethod = this.jobConfig.ReduceFunc.getMethod("Reduce");
+        reducerMethod.invoke(reducer);
+    }
+
+    public Object createMapper() throws InstantiationException, IllegalAccessException, InvocationTargetException, NoSuchMethodException {
+        Class <?> MapperCls = this.jobConfig.MapFunc;
         String uuid = UUID.randomUUID().toString();
-        Object ob = MapperCls.getConstructors()[0].newInstance(uuid);
-        Method method = MapperCls.getMethod("Map");
-        method.invoke(ob);
+        Object thisMapper = MapperCls.getConstructors()[0].newInstance(uuid);
+        return thisMapper;
+    }
+
+    public Object createReducer() throws InstantiationException, IllegalAccessException, InvocationTargetException, NoSuchMethodException {
+        Class <?> ReducerCls = this.jobConfig.ReduceFunc;
+        String uuid = UUID.randomUUID().toString();
+        Object test = ReducerCls.getConstructors()[0];
+        Object thisReducer = ReducerCls.getConstructors()[0].newInstance(uuid);
+        return thisReducer;
     }
 
 }
