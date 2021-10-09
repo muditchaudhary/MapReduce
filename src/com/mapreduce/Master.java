@@ -18,7 +18,7 @@ public class Master {
     }
 
     public void createMapper(JobConf jobConfig) throws InstantiationException, IllegalAccessException, InvocationTargetException, NoSuchMethodException {
-        Class <?> MapperCls = jobConfig.MapFunc.getClass();
+        Class <?> MapperCls = jobConfig.MapFunc;
         byte[] array = new byte[7]; // length is bounded by 7
         new Random().nextBytes(array);
         String uuid = UUID.randomUUID().toString();

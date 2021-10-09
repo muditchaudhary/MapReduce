@@ -6,7 +6,7 @@ import java.lang.reflect.Method;
 public class JobConf {
     public String JobMasterID;
     public String JobMasterJob;
-    public Object MapFunc;
+    public Class<? extends Mapper> MapFunc;
     public Object ReduceFunc;
 
 
@@ -15,7 +15,7 @@ public class JobConf {
         JobMasterJob = JobMasterJob;
     }
 
-    public void setMapper(Object MyMapFunc) throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
+    public void setMapper(Class <? extends Mapper> MyMapFunc) throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
         MapFunc = MyMapFunc;
     }
 
