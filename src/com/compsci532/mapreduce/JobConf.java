@@ -1,4 +1,4 @@
-package com.mapreduce;
+package com.compsci532.mapreduce;
 
 import java.util.UUID;
 
@@ -31,7 +31,7 @@ public class JobConf {
     }
 
     public void setOutputFile (String outputFile){
-        this.outputFile = outputFile;
+        this.outputFile = outputFile+"/"+this.jobName+"_out.txt";
     }
 
     public void setIntermediateFile(String intermediateFile){

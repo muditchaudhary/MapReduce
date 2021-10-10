@@ -1,11 +1,9 @@
-package com.mapreduce;
+package com.compsci532.mapreduce;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.lang.reflect.Array;
 import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.util.*;
 
 public class Master {
@@ -23,42 +21,46 @@ public class Master {
     public void runJob() throws NoSuchMethodException, InvocationTargetException, IllegalAccessException, InstantiationException, IOException {
         runMapper();
         HashMap<String, ArrayList<String>> sortedResult= sortAndShuffle(jobConfig.intermediateFile); // It is just shuffled. Need to implement sort
-
-        Object reducer = createReducer();
-        Method reducerMethod = this.jobConfig.ReduceFunc.getMethod("Reduce");
-        reducerMethod.invoke(reducer);
+        runReducer(sortedResult);
     }
 
-    private Object createMapper() throws InstantiationException, IllegalAccessException, InvocationTargetException, NoSuchMethodException {
-        Class <?> MapperCls = this.jobConfig.MapFunc;
-        Object thisMapper = MapperCls.newInstance();
-        Method mapperSetType = this.jobConfig.MapFunc.getMethod("setWorkerType", String.class);
-        mapperSetType.invoke(thisMapper, "Mapper");
+    private Mapper createMapper() throws InstantiationException, IllegalAccessException, InvocationTargetException, NoSuchMethodException {
+        Class <? extends Mapper> MapperCls = this.jobConfig.MapFunc;
+        Mapper thisMapper = MapperCls.newInstance();
         return thisMapper;
     }
 
-    private Object createReducer() throws InstantiationException, IllegalAccessException, InvocationTargetException, NoSuchMethodException {
-        Class <?> ReducerCls = this.jobConfig.ReduceFunc;
-        Object thisReducer = ReducerCls.newInstance();
+    private Reducer createReducer() throws InstantiationException, IllegalAccessException, InvocationTargetException, NoSuchMethodException {
+        Class <? extends Reducer> ReducerCls = this.jobConfig.ReduceFunc;
+        Reducer thisReducer = ReducerCls.newInstance();
         return thisReducer;
     }
 
     private void runMapper() throws InvocationTargetException, InstantiationException, IllegalAccessException, NoSuchMethodException, IOException {
-        Object mapper = createMapper();
+        Mapper mapper = createMapper();
 
         File inputFile = new File(this.jobConfig.inputFile);
         Scanner myReader = new Scanner(inputFile);
-
-
         FileWriter myWriter = new FileWriter(this.jobConfig.intermediateFile);
-
-        Method mapperMethod = this.jobConfig.MapFunc.getMethod("Map", String.class, FileWriter.class);
 
         while (myReader.hasNextLine()) {
             String line = myReader.nextLine();
-            mapperMethod.invoke(mapper, line, myWriter);
+            mapper.map(null, line, myWriter);
         }
         myReader.close();
+        myWriter.close();
+
+    }
+
+    private void runReducer(HashMap<String, ArrayList<String>> sortedResult) throws InvocationTargetException, InstantiationException, IllegalAccessException, NoSuchMethodException, IOException {
+        Reducer reducer= createReducer();
+        FileWriter myWriter = new FileWriter(this.jobConfig.outputFile);
+
+        for (Map.Entry mapElement : sortedResult.entrySet()) {
+            String key = (String)mapElement.getKey();
+            ArrayList<String> values = (ArrayList<String>) mapElement.getValue();
+            reducer.reduce(key, values, myWriter);
+        }
         myWriter.close();
 
     }
