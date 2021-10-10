@@ -5,12 +5,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-public abstract class Reducer extends Worker{
-    abstract void reduce(String key, ArrayList<String> values, FileWriter result) throws IOException;
-
-    public Reducer(){
-        super("Reducer");
-    }
+public interface Reducer{
+    void reduce(String key, ArrayList<String> values, FileWriter result) throws IOException;
 
     static String reduceResult(String key, Object value){
         String result = key + " "+ value + "\n";

@@ -18,52 +18,19 @@ public class Master {
         this.jobConfig = jobConfig;
     }
 
-    public void runJob() throws NoSuchMethodException, InvocationTargetException, IllegalAccessException, InstantiationException, IOException {
-        runMapper();
+    public void runJob() throws NoSuchMethodException, InvocationTargetException, IllegalAccessException, InstantiationException, IOException, ClassNotFoundException {
+        Worker mapWorker = new Worker("map", this.jobConfig.MapFunc.getName(),
+                this.jobConfig.inputFile, this.jobConfig.intermediateFile, null) ;
+        mapWorker.execute(null);
+
         HashMap<String, ArrayList<String>> sortedResult= sortAndShuffle(jobConfig.intermediateFile); // It is just shuffled. Need to implement sort
-        runReducer(sortedResult);
+
+        Worker reduceWorker = new Worker("reduce", this.jobConfig.ReduceFunc.getName(),
+                null, null, this.jobConfig.outputFile);
+        reduceWorker.execute(sortedResult);
     }
 
-    private Mapper createMapper() throws InstantiationException, IllegalAccessException, InvocationTargetException, NoSuchMethodException {
-        Class <? extends Mapper> MapperCls = this.jobConfig.MapFunc;
-        Mapper thisMapper = MapperCls.newInstance();
-        return thisMapper;
-    }
 
-    private Reducer createReducer() throws InstantiationException, IllegalAccessException, InvocationTargetException, NoSuchMethodException {
-        Class <? extends Reducer> ReducerCls = this.jobConfig.ReduceFunc;
-        Reducer thisReducer = ReducerCls.newInstance();
-        return thisReducer;
-    }
-
-    private void runMapper() throws InvocationTargetException, InstantiationException, IllegalAccessException, NoSuchMethodException, IOException {
-        Mapper mapper = createMapper();
-
-        File inputFile = new File(this.jobConfig.inputFile);
-        Scanner myReader = new Scanner(inputFile);
-        FileWriter myWriter = new FileWriter(this.jobConfig.intermediateFile);
-
-        while (myReader.hasNextLine()) {
-            String line = myReader.nextLine();
-            mapper.map(null, line, myWriter);
-        }
-        myReader.close();
-        myWriter.close();
-
-    }
-
-    private void runReducer(HashMap<String, ArrayList<String>> sortedResult) throws InvocationTargetException, InstantiationException, IllegalAccessException, NoSuchMethodException, IOException {
-        Reducer reducer= createReducer();
-        FileWriter myWriter = new FileWriter(this.jobConfig.outputFile);
-
-        for (Map.Entry mapElement : sortedResult.entrySet()) {
-            String key = (String)mapElement.getKey();
-            ArrayList<String> values = (ArrayList<String>) mapElement.getValue();
-            reducer.reduce(key, values, myWriter);
-        }
-        myWriter.close();
-
-    }
     private HashMap<String, ArrayList<String>> sortAndShuffle(String intermediateFile) throws FileNotFoundException {
         //Just shuffled until now. Need to implement sorting
         HashMap<String, ArrayList<String>> sortedResult = new HashMap<>();
