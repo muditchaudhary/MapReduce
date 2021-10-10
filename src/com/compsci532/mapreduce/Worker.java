@@ -11,7 +11,6 @@ import java.util.*;
 public class Worker {
     private String type;
     private String workerID;
-    private Class <?> funcClass;
     private String funcClassStr;
     private String inputFile;
     private String intermediateFile;
