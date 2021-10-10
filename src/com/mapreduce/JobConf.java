@@ -6,6 +6,7 @@ public class JobConf {
     public String jobID;
     public String jobName;
     public String inputFile;
+    public String intermediateFile;
     public String outputFile;
 
     public Class<? extends Mapper> MapFunc;
@@ -31,5 +32,9 @@ public class JobConf {
 
     public void setOutputFile (String outputFile){
         this.outputFile = outputFile;
+    }
+
+    public void setIntermediateFile(String intermediateFile){
+        this.intermediateFile = intermediateFile+"/"+this.jobName+"_inter.txt";
     }
 }
