@@ -1,14 +1,16 @@
 package com.mapreduce;
+
+import java.util.UUID;
+
 public class Worker {
     private String type;
-    private String WorkerID;
-    public Worker(String type, String WorkerID){
+    private String workerID;
+    public Worker(String type){
         this.type = type;
-        this.WorkerID = WorkerID;
+        this.workerID = UUID.randomUUID().toString();
     }
 
-    public void getMyType(){
-        System.out.println("My type is "+ type);
-        System.out.println("My ID is " + WorkerID);
+    public void getDetails(){
+        System.out.println("Type: "+ this.type + " | Worker ID: "+ this.workerID);
     }
 }

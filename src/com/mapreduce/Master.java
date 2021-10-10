@@ -4,11 +4,12 @@ import java.lang.reflect.Method;
 import java.util.UUID;
 
 public class Master {
-    String MasterID;
+    String masterID;
     JobConf jobConfig;
 
-    public Master(String MasterID){
-        this.MasterID = MasterID;
+
+    public Master(){
+        this.masterID = UUID.randomUUID().toString();
     }
 
     public void setJobConfig(JobConf jobConfig){
@@ -25,18 +26,15 @@ public class Master {
         reducerMethod.invoke(reducer);
     }
 
-    public Object createMapper() throws InstantiationException, IllegalAccessException, InvocationTargetException, NoSuchMethodException {
+    private Object createMapper() throws InstantiationException, IllegalAccessException, InvocationTargetException, NoSuchMethodException {
         Class <?> MapperCls = this.jobConfig.MapFunc;
-        String uuid = UUID.randomUUID().toString();
-        Object thisMapper = MapperCls.getConstructors()[0].newInstance(uuid);
+        Object thisMapper = MapperCls.newInstance();
         return thisMapper;
     }
 
-    public Object createReducer() throws InstantiationException, IllegalAccessException, InvocationTargetException, NoSuchMethodException {
+    private Object createReducer() throws InstantiationException, IllegalAccessException, InvocationTargetException, NoSuchMethodException {
         Class <?> ReducerCls = this.jobConfig.ReduceFunc;
-        String uuid = UUID.randomUUID().toString();
-        Object test = ReducerCls.getConstructors()[0];
-        Object thisReducer = ReducerCls.getConstructors()[0].newInstance(uuid);
+        Object thisReducer = ReducerCls.newInstance();
         return thisReducer;
     }
 
