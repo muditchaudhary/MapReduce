@@ -1,5 +1,12 @@
-package com.compsci532.mapreduce;
-import java.io.*;
+package com.compsci532.usercode;
+
+import com.compsci532.mapreduce.JobConf;
+import com.compsci532.mapreduce.Mapper;
+import com.compsci532.mapreduce.Master;
+import com.compsci532.mapreduce.Reducer;
+
+import java.io.FileWriter;
+import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 

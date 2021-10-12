@@ -6,7 +6,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 
 public class Master {
-    String masterID;
+    public String masterID;
     JobConf jobConfig;
 
     public Master(){
