@@ -3,7 +3,6 @@ package com.compsci532.mapreduce;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.*;
@@ -43,9 +42,9 @@ public class Worker {
     }
 
     private void reduceProcessor(HashMap<String, ArrayList<String>> sortedResult) throws ClassNotFoundException, InstantiationException, IllegalAccessException, NoSuchMethodException, IOException, InvocationTargetException {
-        Class myClass = Class.forName(this.funcClassStr);
-        Object execFuncObj = myClass.newInstance();
-        Method execFuncMethod = myClass.getMethod(this.type, String.class, ArrayList.class, FileWriter.class);
+        Class reduceClass = Class.forName(this.funcClassStr);
+        Object execFuncObj = reduceClass.newInstance();
+        Method execFuncMethod = reduceClass.getMethod(this.type, String.class, ArrayList.class, FileWriter.class);
 
         FileWriter myWriter = new FileWriter(this.outputFile);
 
@@ -59,9 +58,9 @@ public class Worker {
     }
 
     private void mapProcessor() throws IOException, ClassNotFoundException, InstantiationException, IllegalAccessException, NoSuchMethodException, InvocationTargetException {
-        Class myClass = Class.forName(this.funcClassStr);
-        Object execFuncObj = myClass.newInstance();
-        Method execFuncMethod = myClass.getMethod(this.type, String.class, String.class, FileWriter.class);
+        Class mapClass = Class.forName(this.funcClassStr);
+        Object execFuncObj = mapClass.newInstance();
+        Method execFuncMethod = mapClass.getMethod(this.type, String.class, String.class, FileWriter.class);
 
         File inputFile = new File(this.inputFile);
         Scanner myReader = new Scanner(inputFile);
