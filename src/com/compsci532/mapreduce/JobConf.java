@@ -29,8 +29,6 @@ public class JobConf {
         setOutputFile(prop.getProperty("outputFileDirectory"));
         setIntermediateFile("./Intermediate_files");
 
-        System.out.println(this.inputFile);
-        System.out.println(this.outputFile);
     }
 
     public void setMapper(Class <? extends Mapper> MyMapFunc) {

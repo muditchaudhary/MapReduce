@@ -55,10 +55,38 @@ public class Main {
             }
 
             String write_result = Reducer.reduceResult(key, sum);
-            result.write(write_result
-            );
+            result.write(write_result);
         }
     }
+
+    // Task 3 Calculate average price of a stock for given week prices for each day
+    public static class GetAverageStockPriceMapper implements Mapper{
+        public void map(String key, String value, FileWriter result) throws IOException {
+            String[] words = value.split(" ");
+            String stock = words[1];
+            String stockPrice = words[2];
+
+            String write_result = Mapper.mapResult(stock, stockPrice);
+            result.write(write_result);
+
+        }
+    }
+
+    public static class GetAverageStockPriceReducer implements Reducer {
+
+        public void reduce(String key, ArrayList<String> values, FileWriter result) throws IOException {
+            Float sum = 0.00f;
+            int totalPrices = 0;
+            for (String val : values){
+                sum+= Float.parseFloat(val);
+                totalPrices+=1;
+            }
+            Float average = sum/totalPrices;
+            String write_result = Reducer.reduceResult(key, average);
+            result.write(write_result);
+        }
+    }
+
 
     public static void main(String[] args) throws InvocationTargetException, NoSuchMethodException, IllegalAccessException, InstantiationException, IOException, ClassNotFoundException {
         String wordCountConfig = "configs/wordCountConfig.properties";
@@ -83,7 +111,13 @@ public class Main {
         MasterClient.setJobConfig(getTotalSalesJobConfig);
         MasterClient.runJob();
 
-
-
+        String getAverageStockPriceConfig = "configs/getAverageStockPriceConfig.properties";
+        JobConf getAverageStockPriceJobConfig = new JobConf( "getAverageStockPrice", getAverageStockPriceConfig);
+        System.out.println("JobConfig ID: "+ getAverageStockPriceJobConfig.jobID);
+        System.out.println("Running Job: " + getAverageStockPriceJobConfig.jobName);
+        getAverageStockPriceJobConfig.setMapper(GetAverageStockPriceMapper.class);
+        getAverageStockPriceJobConfig.setReducer(GetAverageStockPriceReducer.class);
+        MasterClient.setJobConfig(getAverageStockPriceJobConfig);
+        MasterClient.runJob();
     }
 }
