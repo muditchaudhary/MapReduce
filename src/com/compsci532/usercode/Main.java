@@ -94,7 +94,6 @@ public class Main {
         }
     }
 
-
     public static void main(String[] args) throws InvocationTargetException, NoSuchMethodException, IllegalAccessException, InstantiationException, IOException, ClassNotFoundException {
         String wordCountConfig = "configs/wordCountConfig.properties";
         JobConf wordCountJobConfig = new JobConf( "WordCount", wordCountConfig);
