@@ -94,6 +94,48 @@ public class Main {
         }
     }
 
+    //Task 4 Search if a word exists
+    public static class SearchWordMapper implements Mapper {
+        public void map(String key, String value, FileWriter result) throws IOException {
+            String[] words = value.split(" ");
+            String searchWord = "searchMe";
+
+            for (String word : words) {
+                String write_result = "";
+                if (word.equals(searchWord)) {
+                    // 1 for true; 0 for false
+                    write_result = Mapper.mapResult(searchWord, 1);
+
+                } else {
+                    write_result = Mapper.mapResult(searchWord, 0);
+                }
+                result.write(write_result);
+
+            }
+        }
+    }
+
+    public static class SearchWordReducer implements Reducer {
+
+        public void reduce(String key, ArrayList<String> values, FileWriter result) throws IOException {
+            int psuedoOr = 0;
+            for (String val : values){
+                psuedoOr+= Integer.parseInt(val);
+            }
+            String writeResult = "";
+            if(psuedoOr > 0){
+                writeResult = Reducer.reduceResult(key, "True");
+            }
+            else{
+                writeResult = Reducer.reduceResult(key, "False");
+            }
+
+            result.write(writeResult);
+        }
+    }
+
+
+
     public static void main(String[] args) throws InvocationTargetException, NoSuchMethodException, IllegalAccessException, InstantiationException, IOException, ClassNotFoundException {
         String wordCountConfig = "configs/wordCountConfig.properties";
         JobConf wordCountJobConfig = new JobConf( "WordCount", wordCountConfig);
@@ -124,6 +166,15 @@ public class Main {
         getAverageStockPriceJobConfig.setMapper(GetAverageStockPriceMapper.class);
         getAverageStockPriceJobConfig.setReducer(GetAverageStockPriceReducer.class);
         MasterClient.setJobConfig(getAverageStockPriceJobConfig);
+        MasterClient.runJob();
+
+        String searchWordConfig = "configs/searchWordConfig.properties";
+        JobConf searchWordJobConfig = new JobConf( "searchWord", searchWordConfig);
+        System.out.println("JobConfig ID: "+ searchWordJobConfig.jobID);
+        System.out.println("Running Job: " + searchWordJobConfig.jobName);
+        searchWordJobConfig.setMapper(SearchWordMapper.class);
+        searchWordJobConfig.setReducer(SearchWordReducer.class);
+        MasterClient.setJobConfig(searchWordJobConfig);
         MasterClient.runJob();
     }
 }
