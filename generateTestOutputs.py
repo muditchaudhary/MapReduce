@@ -12,7 +12,7 @@ counts = lines.flatMap(lambda x: x.split(' '))\
 .filter(lambda x: x != '')\
 .map(lambda x: (x, 1))\
 .reduceByKey(add)\
-.saveAsTextFile("./Test_outputs/wordCount_testOut")
+.saveAsTextFile("./spark_test_outputs/wordCount_testOut")
 
 
 # Test 2 getAverageStockPrice
@@ -21,7 +21,7 @@ averageStockPrice = lines.map(lambda x: (x.split(' ')[1], float(x.split(' ')[2])
     .mapValues(lambda v: (v,1))\
     .reduceByKey(lambda a,b: (a[0]+b[0], a[1]+b[1]))\
     .mapValues(lambda v:v[0]/v[1])\
-    .saveAsTextFile("./Test_outputs/getAverageStockPrice_testOut")
+    .saveAsTextFile("./spark_test_outputs/getAverageStockPrice_testOut")
 
 
 # Test 3 searchWord
@@ -32,4 +32,4 @@ averageStockPrice = lines.flatMap(lambda x: x.split(' '))\
     .map(lambda x: (searchWord, 1 if x==searchWord else 0))\
     .reduceByKey(add)\
     .mapValues(lambda v:"True" if v>0 else "False")\
-    .saveAsTextFile("./Test_outputs/searchWord_testOut")
+    .saveAsTextFile("./spark_test_outputs/searchWord_testOut")
