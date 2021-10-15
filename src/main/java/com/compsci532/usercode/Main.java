@@ -137,44 +137,44 @@ public class Main {
 
 
     public static void main(String[] args) throws InvocationTargetException, NoSuchMethodException, IllegalAccessException, InstantiationException, IOException, ClassNotFoundException {
-        String wordCountConfig = "configs/wordCountConfig.properties";
+        String wordCountConfig = "src/main/resources/configs/wordCountConfig.properties";
         JobConf wordCountJobConfig = new JobConf( "WordCount", wordCountConfig);
-        Master MasterClient = new Master();
-        System.out.println("Master ID: " + MasterClient.masterID);
+        Master masterClient = new Master();
+        System.out.println("Master ID: " + masterClient.masterID);
 
         System.out.println("JobConfig ID: "+ wordCountJobConfig.jobID);
         System.out.println("Running Job: " + wordCountJobConfig.jobName);
         wordCountJobConfig.setMapper(WordCountMapper.class);
         wordCountJobConfig.setReducer(WordCountReducer.class);
-        MasterClient.setJobConfig(wordCountJobConfig);
-        MasterClient.runJob();
+        masterClient.setJobConfig(wordCountJobConfig);
+        masterClient.runJob();
 
-        String getTotalSalesConfig = "configs/getTotalSalesConfig.properties";
+        String getTotalSalesConfig = "src/main/resources/configs/getTotalSalesConfig.properties";
         JobConf getTotalSalesJobConfig = new JobConf( "getTotalSales", getTotalSalesConfig);
 
         System.out.println("JobConfig ID: "+ getTotalSalesJobConfig.jobID);
         System.out.println("Running Job: " + getTotalSalesJobConfig.jobName);
         getTotalSalesJobConfig.setMapper(GetTotalSalesMapper.class);
         getTotalSalesJobConfig.setReducer(GetTotalSalesReducer.class);
-        MasterClient.setJobConfig(getTotalSalesJobConfig);
-        MasterClient.runJob();
+        masterClient.setJobConfig(getTotalSalesJobConfig);
+        masterClient.runJob();
 
-        String getAverageStockPriceConfig = "configs/getAverageStockPriceConfig.properties";
+        String getAverageStockPriceConfig = "src/main/resources/configs/getAverageStockPriceConfig.properties";
         JobConf getAverageStockPriceJobConfig = new JobConf( "getAverageStockPrice", getAverageStockPriceConfig);
         System.out.println("JobConfig ID: "+ getAverageStockPriceJobConfig.jobID);
         System.out.println("Running Job: " + getAverageStockPriceJobConfig.jobName);
         getAverageStockPriceJobConfig.setMapper(GetAverageStockPriceMapper.class);
         getAverageStockPriceJobConfig.setReducer(GetAverageStockPriceReducer.class);
-        MasterClient.setJobConfig(getAverageStockPriceJobConfig);
-        MasterClient.runJob();
+        masterClient.setJobConfig(getAverageStockPriceJobConfig);
+        masterClient.runJob();
 
-        String searchWordConfig = "configs/searchWordConfig.properties";
+        String searchWordConfig = "src/main/resources/configs/searchWordConfig.properties";
         JobConf searchWordJobConfig = new JobConf( "searchWord", searchWordConfig);
         System.out.println("JobConfig ID: "+ searchWordJobConfig.jobID);
         System.out.println("Running Job: " + searchWordJobConfig.jobName);
         searchWordJobConfig.setMapper(SearchWordMapper.class);
         searchWordJobConfig.setReducer(SearchWordReducer.class);
-        MasterClient.setJobConfig(searchWordJobConfig);
-        MasterClient.runJob();
+        masterClient.setJobConfig(searchWordJobConfig);
+        masterClient.runJob();
     }
 }
