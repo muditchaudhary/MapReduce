@@ -1,7 +1,6 @@
 package com.compsci532.mapreduce;
 
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
@@ -27,7 +26,7 @@ public class JobConf {
         prop.load(inputStream);
         setInputFile(prop.getProperty("inputFile"));
         setOutputFile(prop.getProperty("outputFileDirectory"));
-        setIntermediateFile("./Intermediate_files");
+        setIntermediateFile("src/main/resources/Intermediate_files");
 
     }
 

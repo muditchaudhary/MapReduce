@@ -3,7 +3,6 @@ package com.compsci532.mapreduce;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.List;
 
 public interface Reducer{
     void reduce(String key, ArrayList<String> values, FileWriter result) throws IOException;
