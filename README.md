@@ -50,6 +50,8 @@ Test run finished after 107 ms
 
 ```
 
+The output of the tasks after running the task will be stored in `src/test/resources/Output_files`.  
+
 ## Structure
 Our MapReduce library is available in `src/main/java/com/compsci532/mapreduce`.  
 The user defined functions are available in `src/main/java/com/compsci532/usercode`.
