@@ -1,6 +1,7 @@
 package com.compsci532.mapreduce;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
@@ -30,23 +31,25 @@ public class Worker {
     }
 
 
-    public void execute(HashMap<String, ArrayList<String>> sortedResult) throws IOException, ClassNotFoundException, InvocationTargetException, InstantiationException, IllegalAccessException, NoSuchMethodException {
+    public void execute() throws IOException, ClassNotFoundException, InvocationTargetException, InstantiationException, IllegalAccessException, NoSuchMethodException {
 
         if (this.type.equals("map")){
             mapProcessor();
         }
         else if (this.type.equals("reduce")){
-            reduceProcessor(sortedResult);
+            reduceProcessor();
         }
 
     }
 
-    private void reduceProcessor(HashMap<String, ArrayList<String>> sortedResult) throws ClassNotFoundException, InstantiationException, IllegalAccessException, NoSuchMethodException, IOException, InvocationTargetException {
+    private void reduceProcessor() throws ClassNotFoundException, InstantiationException, IllegalAccessException, NoSuchMethodException, IOException, InvocationTargetException {
         Class reduceClass = Class.forName(this.funcClassStr);
         Object execFuncObj = reduceClass.newInstance();
         Method execFuncMethod = reduceClass.getMethod(this.type, String.class, ArrayList.class, FileWriter.class);
 
         FileWriter myWriter = new FileWriter(this.outputFile);
+
+        HashMap<String, ArrayList<String>> sortedResult = sortAndShuffle(this.intermediateFile);
 
         for (Map.Entry mapElement : sortedResult.entrySet()) {
             String key = (String)mapElement.getKey();
@@ -72,5 +75,43 @@ public class Worker {
         }
         myReader.close();
         myWriter.close();
+    }
+
+    private HashMap<String, ArrayList<String>> sortAndShuffle(String intermediateFile) throws FileNotFoundException {
+        //Just shuffled until now. Need to implement sorting
+        HashMap<String, ArrayList<String>> sortedResult = new HashMap<>();
+        File intermediateResultFile = new File(intermediateFile);
+        Scanner intermediateResult = new Scanner(intermediateResultFile);
+
+        while (intermediateResult.hasNextLine()) {
+            String line = intermediateResult.nextLine();
+            String[] resultSplit = line.split(" ");
+            sortedResult.computeIfAbsent(resultSplit[0], k -> new ArrayList<>()).add(resultSplit[1]);
+        }
+
+        // Uncomment to check content
+//
+//        for (Map.Entry mapElement : sortedResult.entrySet()) {
+//            String key = (String)mapElement.getKey();
+//
+//            System.out.println(key);
+//            System.out.println(mapElement.getValue().toString());
+//
+//        }
+
+        return sortedResult;
+
+    }
+
+    public static void main(String[] args) throws IOException, ClassNotFoundException, InvocationTargetException, InstantiationException, IllegalAccessException, NoSuchMethodException {
+        String workerType = args[0];
+        String FuncClass = args[1];
+        String inputFile = (args[2] == "null")? null: args[2] ;
+        String intermediateFile = (args[3] == "null")? null: args[3] ;
+        String outputFile =  (args[4] == "null")? null: args[4] ;
+
+        Worker thisWorker = new Worker(workerType, FuncClass, inputFile, intermediateFile, outputFile);
+        thisWorker.execute();
+        System.out.println("Function ran successfully");
     }
 }

@@ -19,15 +19,35 @@ public class Master {
     }
 
     public void runJob() throws NoSuchMethodException, InvocationTargetException, IllegalAccessException, InstantiationException, IOException, ClassNotFoundException {
-        Worker mapWorker = new Worker("map", this.jobConfig.MapFunc.getName(),
-                this.jobConfig.inputFile, this.jobConfig.intermediateFile, null) ;
-        mapWorker.execute(null);
 
-        HashMap<String, ArrayList<String>> sortedResult= sortAndShuffle(jobConfig.intermediateFile); // It is just shuffled. Need to implement sort
+        // MAPPER
+        ProcessBuilder mapperProcess = new ProcessBuilder("java", "-cp", "runMapReduce", "com.compsci532.mapreduce.Worker", "map", this.jobConfig.MapFunc.getName(),
+                this.jobConfig.inputFile, this.jobConfig.intermediateFile, "null");
+        mapperProcess.inheritIO();
 
-        Worker reduceWorker = new Worker("reduce", this.jobConfig.ReduceFunc.getName(),
-                null, null, this.jobConfig.outputFile);
-        reduceWorker.execute(sortedResult);
+
+        try {
+            Process mapper = mapperProcess.start();
+            mapper.waitFor(); // Master waits until this finishes execution. Not a long-term solution as programs won't be running parallely but paused
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+
+        // Reducer
+        ProcessBuilder reducerProcess = new ProcessBuilder("java", "-cp", "runMapReduce", "com.compsci532.mapreduce.Worker", "reduce", this.jobConfig.ReduceFunc.getName(),
+               "null", this.jobConfig.intermediateFile, this.jobConfig.outputFile);
+        reducerProcess.inheritIO();
+
+
+        try {
+            Process reducer = reducerProcess.start();
+            reducer.waitFor(); // Master waits until this finishes execution. Not a long-term solution as programs won't be running parallely but paused
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+
     }
 
 
