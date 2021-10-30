@@ -26,7 +26,7 @@ public class JobConf {
         prop.load(inputStream);
         setInputFile(prop.getProperty("inputFile"));
         setOutputFile(prop.getProperty("outputFileDirectory"));
-        setIntermediateFile("src/main/resources/Intermediate_files");
+        setIntermediateFile("resources/Intermediate_files");
 
     }
 

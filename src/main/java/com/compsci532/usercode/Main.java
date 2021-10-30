@@ -137,7 +137,7 @@ public class Main {
 
 
     public static void main(String[] args) throws InvocationTargetException, NoSuchMethodException, IllegalAccessException, InstantiationException, IOException, ClassNotFoundException {
-        String wordCountConfig = "src/main/resources/configs/wordCountConfig.properties";
+        String wordCountConfig = "resources/configs/wordCountConfig.properties";
         JobConf wordCountJobConfig = new JobConf( "WordCount", wordCountConfig);
         Master masterClient = new Master();
         System.out.println("Master ID: " + masterClient.masterID);
@@ -149,7 +149,7 @@ public class Main {
         masterClient.setJobConfig(wordCountJobConfig);
         masterClient.runJob();
 
-        String getTotalSalesConfig = "src/main/resources/configs/getTotalSalesConfig.properties";
+        String getTotalSalesConfig = "resources/configs/getTotalSalesConfig.properties";
         JobConf getTotalSalesJobConfig = new JobConf( "getTotalSales", getTotalSalesConfig);
 
         System.out.println("JobConfig ID: "+ getTotalSalesJobConfig.jobID);
@@ -159,7 +159,7 @@ public class Main {
         masterClient.setJobConfig(getTotalSalesJobConfig);
         masterClient.runJob();
 
-        String getAverageStockPriceConfig = "src/main/resources/configs/getAverageStockPriceConfig.properties";
+        String getAverageStockPriceConfig = "resources/configs/getAverageStockPriceConfig.properties";
         JobConf getAverageStockPriceJobConfig = new JobConf( "getAverageStockPrice", getAverageStockPriceConfig);
         System.out.println("JobConfig ID: "+ getAverageStockPriceJobConfig.jobID);
         System.out.println("Running Job: " + getAverageStockPriceJobConfig.jobName);
@@ -168,7 +168,7 @@ public class Main {
         masterClient.setJobConfig(getAverageStockPriceJobConfig);
         masterClient.runJob();
 
-        String searchWordConfig = "src/main/resources/configs/searchWordConfig.properties";
+        String searchWordConfig = "resources/configs/searchWordConfig.properties";
         JobConf searchWordJobConfig = new JobConf( "searchWord", searchWordConfig);
         System.out.println("JobConfig ID: "+ searchWordJobConfig.jobID);
         System.out.println("Running Job: " + searchWordJobConfig.jobName);

@@ -35,13 +35,13 @@ public class TestMapReduce {
     @Before
     public void setup(){
         try {
-            wordCountprop.load(new FileInputStream("src/test/resources/configs/test_wordCountConfig.properties"));
+            wordCountprop.load(new FileInputStream("resources/test_configs/test_wordCountConfig.properties"));
             wordCountSparkOutput = wordCountprop.getProperty("sparkOutputFile");
 
-            avgStockProp.load(new FileInputStream("src/test/resources/configs/test_getAverageStockPriceConfig.properties"));
+            avgStockProp.load(new FileInputStream("resources/test_configs/test_getAverageStockPriceConfig.properties"));
             avgStockSparkOutput = avgStockProp.getProperty("sparkOutputFile");
 
-            searchWordProp.load(new FileInputStream("src/test/resources/configs/test_searchWordConfig.properties"));
+            searchWordProp.load(new FileInputStream("resources/test_configs/test_searchWordConfig.properties"));
             searchWordSparkOutput = searchWordProp.getProperty("sparkOutputFile");
 
             masterClient = new Master();
@@ -56,8 +56,8 @@ public class TestMapReduce {
     @Test
     public void wordCountTest() throws IOException, InterruptedException, ClassNotFoundException, InvocationTargetException, NoSuchMethodException, IllegalAccessException, InstantiationException {
 
-        String wordCountConfig = "src/test/resources/configs/test_wordCountConfig.properties";
-        JobConf wordCountJobConfig = new JobConf( "WordCount", wordCountConfig);
+        String wordCountConfig = "resources/test_configs/test_wordCountConfig.properties";
+        JobConf wordCountJobConfig = new JobConf( "Word_Count_Test", wordCountConfig);
 
         System.out.println("Running test job: ------------> " + wordCountJobConfig.jobName);
         wordCountJobConfig.setMapper(Main.WordCountMapper.class);
@@ -106,8 +106,8 @@ public class TestMapReduce {
     @Test
     public void searchWordConfigTest() throws IOException, InterruptedException, ClassNotFoundException, InvocationTargetException, NoSuchMethodException, IllegalAccessException, InstantiationException {
 
-        String searchWordConfig = "src/test/resources/configs/test_searchWordConfig.properties";
-        JobConf searchWordJobConfig = new JobConf( "Search Word", searchWordConfig);
+        String searchWordConfig = "resources/test_configs/test_searchWordConfig.properties";
+        JobConf searchWordJobConfig = new JobConf( "Search_Word_Test", searchWordConfig);
         System.out.println("Running test job: ------------> " + searchWordJobConfig.jobName);
         searchWordJobConfig.setMapper(Main.SearchWordMapper.class);
         searchWordJobConfig.setReducer(Main.SearchWordReducer.class);
@@ -155,8 +155,8 @@ public class TestMapReduce {
     @Test
     public void getAverageStockPriceTest() throws IOException, InterruptedException, ClassNotFoundException, InvocationTargetException, NoSuchMethodException, IllegalAccessException, InstantiationException {
 
-        String avgStockConfig = "src/test/resources/configs/test_getAverageStockPriceConfig.properties";
-        JobConf avgStockJobConfig = new JobConf( "Average Stock Price", avgStockConfig);
+        String avgStockConfig = "resources/test_configs/test_getAverageStockPriceConfig.properties";
+        JobConf avgStockJobConfig = new JobConf( "Average_Stock_Price_Test", avgStockConfig);
         System.out.println("Running test job: ------------> " + avgStockJobConfig.jobName);
         avgStockJobConfig.setMapper(Main.GetAverageStockPriceMapper.class);
         avgStockJobConfig.setReducer(Main.GetAverageStockPriceReducer.class);
