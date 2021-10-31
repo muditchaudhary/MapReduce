@@ -145,7 +145,7 @@ public class Main {
         getTotalSalesJobConfig.setMapper(GetTotalSalesMapper.class);
         getTotalSalesJobConfig.setReducer(GetTotalSalesReducer.class);
         masterClient.setJobConfig(getTotalSalesJobConfig);
-        //masterClient.runJob();
+        masterClient.runJob();
 
         Path getAverageStockPriceConfig = Paths.get("resources", "configs", "getAverageStockPriceConfig.properties");
         JobConf getAverageStockPriceJobConfig = new JobConf( "getAverageStockPrice", getAverageStockPriceConfig.toString());
@@ -154,7 +154,7 @@ public class Main {
         getAverageStockPriceJobConfig.setMapper(GetAverageStockPriceMapper.class);
         getAverageStockPriceJobConfig.setReducer(GetAverageStockPriceReducer.class);
         masterClient.setJobConfig(getAverageStockPriceJobConfig);
-        //masterClient.runJob();
+        masterClient.runJob();
 
         Path searchWordConfig = Paths.get("resources", "configs", "searchWordConfig.properties");
         JobConf searchWordJobConfig = new JobConf( "searchWord", searchWordConfig.toString());
@@ -163,6 +163,6 @@ public class Main {
         searchWordJobConfig.setMapper(SearchWordMapper.class);
         searchWordJobConfig.setReducer(SearchWordReducer.class);
         masterClient.setJobConfig(searchWordJobConfig);
-        //masterClient.runJob();
+        masterClient.runJob();
     }
 }

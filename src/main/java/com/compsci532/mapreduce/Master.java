@@ -2,8 +2,11 @@ package com.compsci532.mapreduce;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.*;
 
 public class Master {
@@ -19,8 +22,9 @@ public class Master {
         this.jobConfig = jobConfig;
     }
 
-    public void runJob() {
+    public void runJob() throws IOException {
 
+        inputPartitioner();
         createAndRunMapper();
         createAndRunReducer();
 
@@ -113,6 +117,29 @@ public class Master {
 
     }
 
+    private void inputPartitioner() throws IOException {
 
+        ArrayList<FileWriter> WriterList= new ArrayList<>();
+        for (Integer i = 0; i<this.jobConfig.numWorkers; i++){
+            Path intermediateFileFullName = Paths.get(this.jobConfig.inputPartitionedFile,
+                    this.jobConfig.jobName+"_"+i+".txt");
+            WriterList.add(new FileWriter(intermediateFileFullName.toString()));
+        }
+
+        File inputFile = new File(this.jobConfig.inputFile);
+        Scanner myReader = new Scanner(inputFile);
+
+        int lines = 0;
+        while (myReader.hasNextLine()) {
+            String line = myReader.nextLine();
+            WriterList.get(lines%this.jobConfig.numWorkers).write(line+"\n");
+            lines++;
+        }
+
+        for (Integer i = 0; i< this.jobConfig.numWorkers; i++){
+            WriterList.get(i).close();
+        }
+
+    }
 
 }

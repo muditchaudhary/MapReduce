@@ -28,7 +28,7 @@ public class MapResultWriter {
 
     public void writeResult(String key, Object value) throws IOException {
         String result = key + " " + value + "\n";
-        Integer key_partition = key.hashCode()%this.numWorkers;
+        Integer key_partition = Math.abs(key.hashCode()%this.numWorkers);
         WriterList.get(key_partition).write(result);
     }
 

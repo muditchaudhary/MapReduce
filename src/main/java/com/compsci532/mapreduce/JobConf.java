@@ -48,10 +48,11 @@ public class JobConf {
         this.ReduceFunc = ReduceFunc;
     }
 
-    public void setInputFile (String inputFile){
+    public void setInputFile (String inputFile) throws IOException {
         //Will have to be changed when dynamically creating directories per job
         this.inputFile = inputFile;
         Path inputPartitions = Paths.get("resources", "File_partitions",this.jobName);
+        Files.createDirectories(inputPartitions);
         this.inputPartitionedFile = inputPartitions.toString();
     }
 
