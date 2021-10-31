@@ -8,6 +8,8 @@ import com.compsci532.mapreduce.Reducer;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 
 public class Main {
@@ -134,11 +136,9 @@ public class Main {
         }
     }
 
-
-
     public static void main(String[] args) throws InvocationTargetException, NoSuchMethodException, IllegalAccessException, InstantiationException, IOException, ClassNotFoundException {
-        String wordCountConfig = "resources/configs/wordCountConfig.properties";
-        JobConf wordCountJobConfig = new JobConf( "WordCount", wordCountConfig);
+        Path wordCountConfig = Paths.get("resources", "configs", "wordCountConfig.properties");
+        JobConf wordCountJobConfig = new JobConf( "WordCount", wordCountConfig.toString());
         Master masterClient = new Master();
         System.out.println("Master ID: " + masterClient.masterID);
 
@@ -149,32 +149,32 @@ public class Main {
         masterClient.setJobConfig(wordCountJobConfig);
         masterClient.runJob();
 
-        String getTotalSalesConfig = "resources/configs/getTotalSalesConfig.properties";
-        JobConf getTotalSalesJobConfig = new JobConf( "getTotalSales", getTotalSalesConfig);
+        Path getTotalSalesConfig = Paths.get("resources", "configs", "getTotalSalesConfig.properties");
+        JobConf getTotalSalesJobConfig = new JobConf( "getTotalSales", getTotalSalesConfig.toString());
 
         System.out.println("JobConfig ID: "+ getTotalSalesJobConfig.jobID);
         System.out.println("Running Job: " + getTotalSalesJobConfig.jobName);
         getTotalSalesJobConfig.setMapper(GetTotalSalesMapper.class);
         getTotalSalesJobConfig.setReducer(GetTotalSalesReducer.class);
         masterClient.setJobConfig(getTotalSalesJobConfig);
-        masterClient.runJob();
+        //masterClient.runJob();
 
-        String getAverageStockPriceConfig = "resources/configs/getAverageStockPriceConfig.properties";
-        JobConf getAverageStockPriceJobConfig = new JobConf( "getAverageStockPrice", getAverageStockPriceConfig);
+        Path getAverageStockPriceConfig = Paths.get("resources", "configs", "getAverageStockPriceConfig.properties");
+        JobConf getAverageStockPriceJobConfig = new JobConf( "getAverageStockPrice", getAverageStockPriceConfig.toString());
         System.out.println("JobConfig ID: "+ getAverageStockPriceJobConfig.jobID);
         System.out.println("Running Job: " + getAverageStockPriceJobConfig.jobName);
         getAverageStockPriceJobConfig.setMapper(GetAverageStockPriceMapper.class);
         getAverageStockPriceJobConfig.setReducer(GetAverageStockPriceReducer.class);
         masterClient.setJobConfig(getAverageStockPriceJobConfig);
-        masterClient.runJob();
+        //masterClient.runJob();
 
-        String searchWordConfig = "resources/configs/searchWordConfig.properties";
-        JobConf searchWordJobConfig = new JobConf( "searchWord", searchWordConfig);
+        Path searchWordConfig = Paths.get("resources", "configs", "searchWordConfig.properties");
+        JobConf searchWordJobConfig = new JobConf( "searchWord", searchWordConfig.toString());
         System.out.println("JobConfig ID: "+ searchWordJobConfig.jobID);
         System.out.println("Running Job: " + searchWordJobConfig.jobName);
         searchWordJobConfig.setMapper(SearchWordMapper.class);
         searchWordJobConfig.setReducer(SearchWordReducer.class);
         masterClient.setJobConfig(searchWordJobConfig);
-        masterClient.runJob();
+        //masterClient.runJob();
     }
 }

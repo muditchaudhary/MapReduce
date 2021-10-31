@@ -8,7 +8,8 @@ import java.util.*;
 
 public class Master {
     public String masterID;
-    JobConf jobConfig;
+    private JobConf jobConfig;
+    private Map <String, Map<String, String>> WorkerStatus = new HashMap<>();
 
     public Master(){
         this.masterID = UUID.randomUUID().toString();
@@ -20,9 +21,14 @@ public class Master {
 
     public void runJob() throws NoSuchMethodException, InvocationTargetException, IllegalAccessException, InstantiationException, IOException, ClassNotFoundException {
 
+
+
         // MAPPER
+
+        /*String thisMapperID = UUID.randomUUID().toString();
+
         ProcessBuilder mapperProcess = new ProcessBuilder("java", "-cp", "runMapReduce", "com.compsci532.mapreduce.Worker", "map", this.jobConfig.MapFunc.getName(),
-                this.jobConfig.inputFile, this.jobConfig.intermediateFile, "null");
+                this.jobConfig.inputFile, this.jobConfig.intermediateFile, "null", Integer.toString(this.jobConfig.numWorkers), thisMapperID);
         mapperProcess.inheritIO();
 
 
@@ -31,50 +37,99 @@ public class Master {
             mapper.waitFor(); // Master waits until this finishes execution. Not a long-term solution as programs won't be running parallely but paused
         } catch (InterruptedException e) {
             e.printStackTrace();
+        }*/
+
+        createAndRunMapper();
+        createAndRunReducer();
+
+
+//        // Reducer
+//        String thisReducerID = UUID.randomUUID().toString();
+//
+//        ProcessBuilder reducerProcess = new ProcessBuilder("java", "-cp", "runMapReduce", "com.compsci532.mapreduce.Worker", "reduce", this.jobConfig.ReduceFunc.getName(),
+//               "null", this.jobConfig.intermediateFile, this.jobConfig.outputFile,Integer.toString(this.jobConfig.numWorkers), thisReducerID);
+//        reducerProcess.inheritIO();
+//
+//
+//        try {
+//            Process reducer = reducerProcess.start();
+//            reducer.waitFor(); // Master waits until this finishes execution. Not a long-term solution as programs won't be running parallely but paused
+//        } catch (InterruptedException e) {
+//            e.printStackTrace();
+//        }
+
+        printWorkerStatus();
+    }
+
+
+    private boolean createAndRunMapper(){
+
+        String thisMapperID = UUID.randomUUID().toString();
+        Map<String, String> thisStatus = new HashMap<>();
+        thisStatus.put("type", "Mapper");
+        thisStatus.put("status", "InProgress");
+        thisStatus.put("partition", "1");
+
+        this.WorkerStatus.put(thisMapperID, thisStatus);
+        ProcessBuilder mapperProcess = new ProcessBuilder("java", "-cp", "runMapReduce", "com.compsci532.mapreduce.Worker", "map", this.jobConfig.MapFunc.getName(),
+                this.jobConfig.inputFile, this.jobConfig.intermediateFile, "null", Integer.toString(this.jobConfig.numWorkers), thisMapperID);
+        mapperProcess.inheritIO();
+
+
+        try {
+            Process mapper = mapperProcess.start();
+            mapper.waitFor(); // Master waits until this finishes execution. Not a long-term solution as programs won't be running parallely but paused
+        } catch (InterruptedException | IOException e) {
+            e.printStackTrace();
+            return false;
         }
+        return true;
+    }
+
+    private boolean createAndRunReducer(){
 
 
-        // Reducer
+        String thisReducerID = UUID.randomUUID().toString();
+        Map<String, String> thisStatus = new HashMap<>();
+        thisStatus.put("type", "Reducer");
+        thisStatus.put("status", "InProgress");
+        thisStatus.put("partition", "1");
+        this.WorkerStatus.put(thisReducerID, thisStatus);
+
         ProcessBuilder reducerProcess = new ProcessBuilder("java", "-cp", "runMapReduce", "com.compsci532.mapreduce.Worker", "reduce", this.jobConfig.ReduceFunc.getName(),
-               "null", this.jobConfig.intermediateFile, this.jobConfig.outputFile);
+                "null", this.jobConfig.intermediateFile, this.jobConfig.outputFile,Integer.toString(this.jobConfig.numWorkers), thisReducerID);
         reducerProcess.inheritIO();
 
 
         try {
             Process reducer = reducerProcess.start();
             reducer.waitFor(); // Master waits until this finishes execution. Not a long-term solution as programs won't be running parallely but paused
-        } catch (InterruptedException e) {
+        } catch (InterruptedException | IOException e) {
             e.printStackTrace();
+
+            return false;
         }
 
+        return true;
+    }
+
+    private void printWorkerStatus(){
+
+        for (Map.Entry<String, Map<String, String>> mapElement : this.WorkerStatus.entrySet()) {
+            String key = (String)mapElement.getKey();
+
+            System.out.print(key);
+            System.out.println(": "+ mapElement.getValue());
+//            for(Map.Entry<String, String> innerEntry : mapElement.getValue().entrySet()){
+//                String key_inner = (String)mapElement.getKey();
+//                //System.out.print(key_inner);
+//                System.out.println(": "+ mapElement.getValue());
+//
+//            }
+        }
 
     }
 
 
-    private HashMap<String, ArrayList<String>> sortAndShuffle(String intermediateFile) throws FileNotFoundException {
-        //Just shuffled until now. Need to implement sorting
-        HashMap<String, ArrayList<String>> sortedResult = new HashMap<>();
-        File intermediateResultFile = new File(this.jobConfig.intermediateFile);
-        Scanner intermediateResult = new Scanner(intermediateResultFile);
-
-        while (intermediateResult.hasNextLine()) {
-            String line = intermediateResult.nextLine();
-            String[] resultSplit = line.split(" ");
-            sortedResult.computeIfAbsent(resultSplit[0], k -> new ArrayList<>()).add(resultSplit[1]);
-        }
-
-        // Uncomment to check content
-//
-//        for (Map.Entry mapElement : sortedResult.entrySet()) {
-//            String key = (String)mapElement.getKey();
-//
-//            System.out.println(key);
-//            System.out.println(mapElement.getValue().toString());
-//
-//        }
-
-        return sortedResult;
-
-    }
 
 }

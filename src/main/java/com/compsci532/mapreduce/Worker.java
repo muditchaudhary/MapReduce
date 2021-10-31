@@ -6,6 +6,8 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.*;
 
 public class Worker {
@@ -15,14 +17,16 @@ public class Worker {
     private String inputFile;
     private String intermediateFile;
     private String outputFile;
+    private Integer numWorkers;
 
-    public Worker(String type, String funcClassStr, String inputFile, String intermediateFile, String outputFile){
+    public Worker(String type, String funcClassStr, String inputFile, String intermediateFile, String outputFile, Integer numWorkers, String ID){
         this.type = type;
-        this.workerID = UUID.randomUUID().toString();
+        this.workerID = ID;
         this.funcClassStr = funcClassStr;
         this.inputFile = inputFile;
         this.outputFile = outputFile;
         this.intermediateFile = intermediateFile;
+        this.numWorkers = numWorkers;
 
     }
 
@@ -67,20 +71,31 @@ public class Worker {
 
         File inputFile = new File(this.inputFile);
         Scanner myReader = new Scanner(inputFile);
-        FileWriter myWriter = new FileWriter(this.intermediateFile);
+
+        ArrayList<FileWriter> WriterList= new ArrayList<>();
+        for (Integer i = 0; i< this.numWorkers; i++){
+            //String intermediateFileFullName = this.intermediateFile+ "/" + this.workerID + "_" + i +".txt";
+            Path intermediateFileFullName = Paths.get(this.intermediateFile, i+".txt");
+            WriterList.add(new FileWriter(intermediateFileFullName.toString()));
+        }
 
         while (myReader.hasNextLine()) {
             String line = myReader.nextLine();
-            execFuncMethod.invoke(execFuncObj,null,line,myWriter);
+            execFuncMethod.invoke(execFuncObj,null,line,WriterList.get(0));
         }
         myReader.close();
-        myWriter.close();
+        for (Integer i = 0; i< this.numWorkers; i++){
+            WriterList.get(i).close();
+        }
     }
 
     private HashMap<String, ArrayList<String>> sortAndShuffle(String intermediateFile) throws FileNotFoundException {
         //Just shuffled until now. Need to implement sorting
         HashMap<String, ArrayList<String>> sortedResult = new HashMap<>();
-        File intermediateResultFile = new File(intermediateFile);
+
+        Integer i = 0; //For temporary purpose only
+        Path intermediateFileFullName = Paths.get(this.intermediateFile, i+".txt");
+        File intermediateResultFile = new File(intermediateFileFullName.toString());
         Scanner intermediateResult = new Scanner(intermediateResultFile);
 
         while (intermediateResult.hasNextLine()) {
@@ -109,8 +124,11 @@ public class Worker {
         String inputFile = (args[2] == "null")? null: args[2] ;
         String intermediateFile = (args[3] == "null")? null: args[3] ;
         String outputFile =  (args[4] == "null")? null: args[4] ;
+        Integer numWorkers = Integer.parseInt(args[5]);
+        String ID = args[6];
 
-        Worker thisWorker = new Worker(workerType, FuncClass, inputFile, intermediateFile, outputFile);
+
+        Worker thisWorker = new Worker(workerType, FuncClass, inputFile, intermediateFile, outputFile, numWorkers, ID);
         thisWorker.execute();
         System.out.println("Function ran successfully");
     }
