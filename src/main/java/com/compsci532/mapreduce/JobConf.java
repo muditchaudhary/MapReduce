@@ -16,6 +16,7 @@ public class JobConf {
     public String intermediateFile;
     public String outputFile;
     public Integer numWorkers;
+    public String inputPartitionedFile;
 
     public Class<? extends Mapper> MapFunc;
     public Class<? extends Reducer> ReduceFunc;
@@ -48,11 +49,16 @@ public class JobConf {
     }
 
     public void setInputFile (String inputFile){
+        //Will have to be changed when dynamically creating directories per job
         this.inputFile = inputFile;
+        Path inputPartitions = Paths.get("resources", "File_partitions",this.jobName);
+        this.inputPartitionedFile = inputPartitions.toString();
     }
 
-    public void setOutputFile (String outputFile){
-        this.outputFile = outputFile+"/"+this.jobName+"_out.txt";
+    public void setOutputFile (String outputFile) throws IOException {
+        Path outputFileLocation = Paths.get(outputFile, this.jobName);
+        this.outputFile = outputFileLocation.toString();
+        Files.createDirectories(outputFileLocation);
     }
 
     public void setIntermediateLocation(String intermediateFile) throws IOException {

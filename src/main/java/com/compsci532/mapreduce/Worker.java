@@ -2,7 +2,6 @@ package com.compsci532.mapreduce;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -18,8 +17,10 @@ public class Worker {
     private String intermediateFile;
     private String outputFile;
     private Integer numWorkers;
+    private String assignedPartition;
+    private String jobName;
 
-    public Worker(String type, String funcClassStr, String inputFile, String intermediateFile, String outputFile, Integer numWorkers, String ID){
+    public Worker(String type, String funcClassStr, String inputFile, String intermediateFile, String outputFile, Integer numWorkers, String ID, String assignedPartition, String jobName){
         this.type = type;
         this.workerID = ID;
         this.funcClassStr = funcClassStr;
@@ -27,6 +28,8 @@ public class Worker {
         this.outputFile = outputFile;
         this.intermediateFile = intermediateFile;
         this.numWorkers = numWorkers;
+        this.assignedPartition = assignedPartition; //Works as the input partition assigned to mapper and as the input parition of the reducer
+        this.jobName = jobName;
 
     }
 
@@ -49,60 +52,65 @@ public class Worker {
     private void reduceProcessor() throws ClassNotFoundException, InstantiationException, IllegalAccessException, NoSuchMethodException, IOException, InvocationTargetException {
         Class reduceClass = Class.forName(this.funcClassStr);
         Object execFuncObj = reduceClass.newInstance();
-        Method execFuncMethod = reduceClass.getMethod(this.type, String.class, ArrayList.class, FileWriter.class);
+        Method execFuncMethod = reduceClass.getMethod(this.type, String.class, ArrayList.class, ReduceResultWriter.class);
 
-        FileWriter myWriter = new FileWriter(this.outputFile);
+        //FileWriter myWriter = new FileWriter(this.outputFile);
+        ReduceResultWriter writer = new ReduceResultWriter(this.numWorkers, this.outputFile, this.assignedPartition);
 
         HashMap<String, ArrayList<String>> sortedResult = sortAndShuffle(this.intermediateFile);
 
         for (Map.Entry mapElement : sortedResult.entrySet()) {
             String key = (String)mapElement.getKey();
             ArrayList<String> values = (ArrayList<String>) mapElement.getValue();
-            execFuncMethod.invoke(execFuncObj,key,values,myWriter);
+            execFuncMethod.invoke(execFuncObj,key,values,writer);
 
         }
-        myWriter.close();
+        //myWriter.close();
+        writer.reduceWriterClose();
     }
 
     private void mapProcessor() throws IOException, ClassNotFoundException, InstantiationException, IllegalAccessException, NoSuchMethodException, InvocationTargetException {
         Class mapClass = Class.forName(this.funcClassStr);
         Object execFuncObj = mapClass.newInstance();
-        Method execFuncMethod = mapClass.getMethod(this.type, String.class, String.class, FileWriter.class);
+        Method execFuncMethod = mapClass.getMethod(this.type, String.class, String.class, MapResultWriter.class);
 
-        File inputFile = new File(this.inputFile);
+        Path inputFileLocation = Paths.get(this.inputFile, this.jobName+"_"+this.assignedPartition+".txt");
+        File inputFile = new File(inputFileLocation.toString());
         Scanner myReader = new Scanner(inputFile);
 
-        ArrayList<FileWriter> WriterList= new ArrayList<>();
-        for (Integer i = 0; i< this.numWorkers; i++){
-            //String intermediateFileFullName = this.intermediateFile+ "/" + this.workerID + "_" + i +".txt";
-            Path intermediateFileFullName = Paths.get(this.intermediateFile, i+".txt");
-            WriterList.add(new FileWriter(intermediateFileFullName.toString()));
-        }
+        MapResultWriter mapWriter = new MapResultWriter(this.numWorkers, this.intermediateFile, this.workerID);
 
         while (myReader.hasNextLine()) {
             String line = myReader.nextLine();
-            execFuncMethod.invoke(execFuncObj,null,line,WriterList.get(0));
+            execFuncMethod.invoke(execFuncObj,null,line, mapWriter);
         }
         myReader.close();
-        for (Integer i = 0; i< this.numWorkers; i++){
-            WriterList.get(i).close();
-        }
+        mapWriter.mapWriterClose();
     }
 
     private HashMap<String, ArrayList<String>> sortAndShuffle(String intermediateFile) throws FileNotFoundException {
         //Just shuffled until now. Need to implement sorting
         HashMap<String, ArrayList<String>> sortedResult = new HashMap<>();
 
-        Integer i = 0; //For temporary purpose only
-        Path intermediateFileFullName = Paths.get(this.intermediateFile, i+".txt");
-        File intermediateResultFile = new File(intermediateFileFullName.toString());
-        Scanner intermediateResult = new Scanner(intermediateResultFile);
+        File intermediateFileDir = new File(intermediateFile);
+        File[] intermediateResultFiles = intermediateFileDir.listFiles((d, name) -> name.endsWith("_"+this.assignedPartition +".txt"));
 
-        while (intermediateResult.hasNextLine()) {
-            String line = intermediateResult.nextLine();
-            String[] resultSplit = line.split(" ");
-            sortedResult.computeIfAbsent(resultSplit[0], k -> new ArrayList<>()).add(resultSplit[1]);
+        ArrayList<Scanner> intermediateResultScanners= new ArrayList<>();
+        for (File file : intermediateResultFiles){
+
+            intermediateResultScanners.add(new Scanner(file));
         }
+
+        for (Scanner scanner : intermediateResultScanners){
+
+            while (scanner.hasNextLine()) {
+                String line = scanner.nextLine();
+                String[] resultSplit = line.split(" ");
+                sortedResult.computeIfAbsent(resultSplit[0], k -> new ArrayList<>()).add(resultSplit[1]);
+            }
+
+        }
+
 
         // Uncomment to check content
 //
@@ -126,9 +134,11 @@ public class Worker {
         String outputFile =  (args[4] == "null")? null: args[4] ;
         Integer numWorkers = Integer.parseInt(args[5]);
         String ID = args[6];
+        String reducerWorkingPartition = (args[7] == "null")? null: args[7] ;
+        String jobName = args[8];
 
 
-        Worker thisWorker = new Worker(workerType, FuncClass, inputFile, intermediateFile, outputFile, numWorkers, ID);
+        Worker thisWorker = new Worker(workerType, FuncClass, inputFile, intermediateFile, outputFile, numWorkers, ID, reducerWorkingPartition, jobName);
         thisWorker.execute();
         System.out.println("Function ran successfully");
     }

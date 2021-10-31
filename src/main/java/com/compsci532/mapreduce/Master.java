@@ -19,96 +19,79 @@ public class Master {
         this.jobConfig = jobConfig;
     }
 
-    public void runJob() throws NoSuchMethodException, InvocationTargetException, IllegalAccessException, InstantiationException, IOException, ClassNotFoundException {
-
-
-
-        // MAPPER
-
-        /*String thisMapperID = UUID.randomUUID().toString();
-
-        ProcessBuilder mapperProcess = new ProcessBuilder("java", "-cp", "runMapReduce", "com.compsci532.mapreduce.Worker", "map", this.jobConfig.MapFunc.getName(),
-                this.jobConfig.inputFile, this.jobConfig.intermediateFile, "null", Integer.toString(this.jobConfig.numWorkers), thisMapperID);
-        mapperProcess.inheritIO();
-
-
-        try {
-            Process mapper = mapperProcess.start();
-            mapper.waitFor(); // Master waits until this finishes execution. Not a long-term solution as programs won't be running parallely but paused
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }*/
+    public void runJob() {
 
         createAndRunMapper();
         createAndRunReducer();
 
-
-//        // Reducer
-//        String thisReducerID = UUID.randomUUID().toString();
-//
-//        ProcessBuilder reducerProcess = new ProcessBuilder("java", "-cp", "runMapReduce", "com.compsci532.mapreduce.Worker", "reduce", this.jobConfig.ReduceFunc.getName(),
-//               "null", this.jobConfig.intermediateFile, this.jobConfig.outputFile,Integer.toString(this.jobConfig.numWorkers), thisReducerID);
-//        reducerProcess.inheritIO();
-//
-//
-//        try {
-//            Process reducer = reducerProcess.start();
-//            reducer.waitFor(); // Master waits until this finishes execution. Not a long-term solution as programs won't be running parallely but paused
-//        } catch (InterruptedException e) {
-//            e.printStackTrace();
-//        }
-
-        printWorkerStatus();
+        // Uncomment to check if workers are created and logged into status map
+        //printWorkerStatus();
     }
 
 
     private boolean createAndRunMapper(){
 
-        String thisMapperID = UUID.randomUUID().toString();
-        Map<String, String> thisStatus = new HashMap<>();
-        thisStatus.put("type", "Mapper");
-        thisStatus.put("status", "InProgress");
-        thisStatus.put("partition", "1");
+        for (int i = 0; i<this.jobConfig.numWorkers;i++){
 
-        this.WorkerStatus.put(thisMapperID, thisStatus);
-        ProcessBuilder mapperProcess = new ProcessBuilder("java", "-cp", "runMapReduce", "com.compsci532.mapreduce.Worker", "map", this.jobConfig.MapFunc.getName(),
-                this.jobConfig.inputFile, this.jobConfig.intermediateFile, "null", Integer.toString(this.jobConfig.numWorkers), thisMapperID);
-        mapperProcess.inheritIO();
+            String thisMapperID = UUID.randomUUID().toString();
+            Map<String, String> thisStatus = new HashMap<>();
+            thisStatus.put("type", "Mapper");
+            thisStatus.put("status", "InProgress");
+            thisStatus.put("partition", Integer.toString(i));
+
+            this.WorkerStatus.put(thisMapperID, thisStatus);
+            ProcessBuilder mapperProcess = new ProcessBuilder("java", "-cp", "runMapReduce", "com.compsci532.mapreduce.Worker",
+                    "map", this.jobConfig.MapFunc.getName(),
+                    this.jobConfig.inputPartitionedFile, this.jobConfig.intermediateFile, "null", Integer.toString(this.jobConfig.numWorkers),
+                    thisMapperID, Integer.toString(i), this.jobConfig.jobName);
+            mapperProcess.inheritIO();
 
 
-        try {
-            Process mapper = mapperProcess.start();
-            mapper.waitFor(); // Master waits until this finishes execution. Not a long-term solution as programs won't be running parallely but paused
-        } catch (InterruptedException | IOException e) {
-            e.printStackTrace();
-            return false;
+            try {
+                Process mapper = mapperProcess.start();
+                mapper.waitFor(); // Master waits until this finishes execution. Not a long-term solution as programs won't be running parallely but paused
+            } catch (InterruptedException | IOException e) {
+                e.printStackTrace();
+                return false;
+            }
+
+
+
         }
         return true;
+
     }
 
     private boolean createAndRunReducer(){
 
 
-        String thisReducerID = UUID.randomUUID().toString();
-        Map<String, String> thisStatus = new HashMap<>();
-        thisStatus.put("type", "Reducer");
-        thisStatus.put("status", "InProgress");
-        thisStatus.put("partition", "1");
-        this.WorkerStatus.put(thisReducerID, thisStatus);
+        for (int i=0; i<this.jobConfig.numWorkers; i++){
 
-        ProcessBuilder reducerProcess = new ProcessBuilder("java", "-cp", "runMapReduce", "com.compsci532.mapreduce.Worker", "reduce", this.jobConfig.ReduceFunc.getName(),
-                "null", this.jobConfig.intermediateFile, this.jobConfig.outputFile,Integer.toString(this.jobConfig.numWorkers), thisReducerID);
-        reducerProcess.inheritIO();
+            String thisReducerID = UUID.randomUUID().toString();
+            Map<String, String> thisStatus = new HashMap<>();
+            thisStatus.put("type", "Reducer");
+            thisStatus.put("status", "InProgress");
+            thisStatus.put("partition", Integer.toString(i));
+            this.WorkerStatus.put(thisReducerID, thisStatus);
 
 
-        try {
-            Process reducer = reducerProcess.start();
-            reducer.waitFor(); // Master waits until this finishes execution. Not a long-term solution as programs won't be running parallely but paused
-        } catch (InterruptedException | IOException e) {
-            e.printStackTrace();
+            ProcessBuilder reducerProcess = new ProcessBuilder("java", "-cp", "runMapReduce",
+                    "com.compsci532.mapreduce.Worker", "reduce", this.jobConfig.ReduceFunc.getName(),
+                    "null", this.jobConfig.intermediateFile, this.jobConfig.outputFile,
+                    Integer.toString(this.jobConfig.numWorkers), thisReducerID, Integer.toString(i), this.jobConfig.jobName);
+            reducerProcess.inheritIO();
 
-            return false;
+
+            try {
+                Process reducer = reducerProcess.start();
+                reducer.waitFor(); // Master waits until this finishes execution. Not a long-term solution as programs won't be running parallely but paused
+            } catch (InterruptedException | IOException e) {
+                e.printStackTrace();
+                return false;
+            }
+
         }
+
 
         return true;
     }
