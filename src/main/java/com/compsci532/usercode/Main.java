@@ -139,18 +139,40 @@ public class Main {
 
     }
 
+    public static void runTaskwithFailure(String jobName, String config, Class <? extends Mapper> MapperCls, Class<? extends Reducer> ReducerCls) throws IOException {
+
+        JobConf wordCountJobConfig = new JobConf( jobName, config, "true");
+        Master masterClient = new Master();
+        System.out.println("Master ID: " + masterClient.masterID);
+
+        System.out.println("JobConfig ID: "+ wordCountJobConfig.jobID);
+        System.out.println("Running Job: " + wordCountJobConfig.jobName);
+        wordCountJobConfig.setMapper(MapperCls);
+        wordCountJobConfig.setReducer(ReducerCls);
+        masterClient.setJobConfig(wordCountJobConfig);
+        masterClient.runJob();
+
+    }
+
     public static void main(String[] args) throws InvocationTargetException, NoSuchMethodException, IllegalAccessException, InstantiationException, IOException, ClassNotFoundException {
         String wordCountConfig = Paths.get("resources", "configs", "wordCountConfig.properties").toString();
         runTask("WordCount", wordCountConfig, WordCountMapper.class, WordCountReducer.class);
 
+        runTaskwithFailure("WordCountFailure", wordCountConfig, WordCountMapper.class, WordCountReducer.class);
+
         String getTotalSalesConfig = Paths.get("resources", "configs", "getTotalSalesConfig.properties").toString();
         runTask("getTotalSales", getTotalSalesConfig, GetTotalSalesMapper.class, GetTotalSalesReducer.class);
+        runTaskwithFailure("getTotalSalesFailure", getTotalSalesConfig, GetTotalSalesMapper.class, GetTotalSalesReducer.class);
+
 
         String getAverageStockPriceConfig = Paths.get("resources", "configs", "getAverageStockPriceConfig.properties").toString();
         runTask("getAverageStockPrice", getAverageStockPriceConfig, GetAverageStockPriceMapper.class, GetAverageStockPriceReducer.class);
+        runTaskwithFailure("getAverageStockPriceFailure", getAverageStockPriceConfig, GetAverageStockPriceMapper.class, GetAverageStockPriceReducer.class);
+
 
         String searchWordConfig = Paths.get("resources", "configs", "searchWordConfig.properties").toString();
         runTask("searchWord", searchWordConfig, SearchWordMapper.class, SearchWordReducer.class);
+        runTaskwithFailure("searchWordFailure", searchWordConfig, SearchWordMapper.class, SearchWordReducer.class);
 
 
 
