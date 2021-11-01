@@ -140,6 +140,5 @@ public class Worker {
 
         Worker thisWorker = new Worker(workerType, FuncClass, inputFile, intermediateFile, outputFile, numWorkers, ID, reducerWorkingPartition, jobName);
         thisWorker.execute();
-        System.out.println("Function ran successfully");
     }
 }
