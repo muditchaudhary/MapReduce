@@ -15,19 +15,38 @@ import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
+/**
+ * Worker class
+ */
 public class Worker {
-    private String type;
-    private String workerID;
-    private String funcClassStr;
-    private String inputFile;
-    private String intermediateFile;
-    private String outputFile;
-    private Integer numWorkers;
-    private String assignedPartition;
-    private String jobName;
-    private static HeartbeatRMIInterface look_up;
-    private String deliberateFailure;
+    private String type; // Worker type
+    private String workerID;    // Worker UUID assigned by the master
+    private String funcClassStr;    // Worker's function's class
+    private String inputFile;   // Input File location (partitioned input for mapper)
+    private String intermediateFile; // Intermediate file location
+    private String outputFile;  // Output file location
+    private Integer numWorkers; // Number of workers
+    private String assignedPartition;   // Partition assigned to the worker (Different meanings for mapper and reducer)
+    private String jobName; // Job Name
+    private static HeartbeatRMIInterface look_up;   // Heartbeat server communicator
+    private String deliberateFailure;   // Flag for deliberate failure of mapper
 
+    /**
+     * Constructor method for Worker
+     * @param type
+     * @param funcClassStr
+     * @param inputFile
+     * @param intermediateFile
+     * @param outputFile
+     * @param numWorkers
+     * @param ID
+     * @param assignedPartition
+     * @param jobName
+     * @param deliberateFailure
+     * @throws MalformedURLException
+     * @throws NotBoundException
+     * @throws RemoteException
+     */
     public Worker(String type, String funcClassStr, String inputFile, String intermediateFile, String outputFile,
                   Integer numWorkers, String ID, String assignedPartition,
                   String jobName, String deliberateFailure) throws MalformedURLException, NotBoundException, RemoteException {
@@ -44,11 +63,25 @@ public class Worker {
         look_up = (HeartbeatRMIInterface) Naming.lookup("//localhost:9997/HeartBeatServer");
     }
 
+    /**
+     * Get worker details method for monitoring and debugging purposes
+     */
     public void getDetails(){
         System.out.println("Type: "+ this.type + " | Worker ID: "+ this.workerID);
     }
 
 
+    /**
+     * Execute worker's method
+     *
+     * @throws IOException
+     * @throws ClassNotFoundException
+     * @throws InvocationTargetException
+     * @throws InstantiationException
+     * @throws IllegalAccessException
+     * @throws NoSuchMethodException
+     * @throws InterruptedException
+     */
     public void execute() throws IOException, ClassNotFoundException, InvocationTargetException, InstantiationException, IllegalAccessException, NoSuchMethodException, InterruptedException {
 
         if (this.type.equals("map")){
@@ -60,29 +93,51 @@ public class Worker {
 
     }
 
+    /**
+     * Processor for reduce that performs required action before invoking reducer function
+     * @throws ClassNotFoundException
+     * @throws InstantiationException
+     * @throws IllegalAccessException
+     * @throws NoSuchMethodException
+     * @throws IOException
+     * @throws InvocationTargetException
+     */
     private void reduceProcessor() throws ClassNotFoundException, InstantiationException, IllegalAccessException, NoSuchMethodException, IOException, InvocationTargetException {
+        look_up.heartBeatReceiver(this.workerID, LocalDateTime.now(),"InProgress");
         Class reduceClass = Class.forName(this.funcClassStr);
         Object execFuncObj = reduceClass.newInstance();
         Method execFuncMethod = reduceClass.getMethod(this.type, String.class, ArrayList.class, ReduceResultWriter.class);
 
         ReduceResultWriter writer = new ReduceResultWriter(this.numWorkers, this.outputFile, this.assignedPartition);
 
+        // Shuffle and group the values by key
         HashMap<String, ArrayList<String>> sortedResult = sortAndShuffle(this.intermediateFile);
 
+        // Run reducer function
         for (Map.Entry mapElement : sortedResult.entrySet()) {
-            LocalDateTime now = LocalDateTime.now();
-            look_up.heartBeatReceiver(this.workerID, now,"InProgress");
+            look_up.heartBeatReceiver(this.workerID, LocalDateTime.now(),"InProgress");
             String key = (String)mapElement.getKey();
             ArrayList<String> values = (ArrayList<String>) mapElement.getValue();
             execFuncMethod.invoke(execFuncObj,key,values,writer);
 
         }
         writer.reduceWriterClose();
-        LocalDateTime now = LocalDateTime.now();
-        look_up.heartBeatReceiver(this.workerID, now,"completed");
+
+        // Send completed status heartbeat
+        look_up.heartBeatReceiver(this.workerID, LocalDateTime.now(),"completed");
 
     }
 
+    /**
+     * Processor for mapper that performs required action before invoking mapper function
+     *
+     * @throws IOException
+     * @throws ClassNotFoundException
+     * @throws InstantiationException
+     * @throws IllegalAccessException
+     * @throws NoSuchMethodException
+     * @throws InvocationTargetException
+     */
     private void mapProcessor() throws IOException, ClassNotFoundException, InstantiationException, IllegalAccessException, NoSuchMethodException, InvocationTargetException {
         look_up.heartBeatReceiver(this.workerID, LocalDateTime.now(),"InProgress");
         Class mapClass = Class.forName(this.funcClassStr);
@@ -95,9 +150,12 @@ public class Worker {
 
         MapResultWriter mapWriter = new MapResultWriter(this.numWorkers, this.intermediateFile, this.workerID);
 
+        // Exit if deliberateFailure is true
         if(this.deliberateFailure.equals("true")){
             System.exit(0);
         }
+
+        // Perform mapper function
         while (myReader.hasNextLine()) {
             LocalDateTime now = LocalDateTime.now();
 
@@ -108,12 +166,18 @@ public class Worker {
         }
         myReader.close();
         mapWriter.mapWriterClose();
-        LocalDateTime now = LocalDateTime.now();
-        look_up.heartBeatReceiver(this.workerID, now,"completed");
+        // Send completed status heartbeat
+        look_up.heartBeatReceiver(this.workerID, LocalDateTime.now(),"completed");
     }
 
+    /**
+     * Shuffle and group values according to key to be fed into reducer
+     *
+     * @param intermediateFile
+     * @return
+     * @throws FileNotFoundException
+     */
     private HashMap<String, ArrayList<String>> sortAndShuffle(String intermediateFile) throws FileNotFoundException {
-        //Just shuffled until now. Need to implement sorting
         HashMap<String, ArrayList<String>> sortedResult = new HashMap<>();
 
         File intermediateFileDir = new File(intermediateFile);
@@ -139,6 +203,18 @@ public class Worker {
 
     }
 
+    /**
+     * Main function for the Worker
+     * @param args
+     * @throws IOException
+     * @throws ClassNotFoundException
+     * @throws InvocationTargetException
+     * @throws InstantiationException
+     * @throws IllegalAccessException
+     * @throws NoSuchMethodException
+     * @throws NotBoundException
+     * @throws InterruptedException
+     */
     public static void main(String[] args) throws IOException, ClassNotFoundException, InvocationTargetException, InstantiationException, IllegalAccessException, NoSuchMethodException, NotBoundException, InterruptedException {
         String workerType = args[0];
         String FuncClass = args[1];

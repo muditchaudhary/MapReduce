@@ -2,16 +2,20 @@ package com.compsci532.usercode;
 
 import com.compsci532.mapreduce.*;
 
-import java.io.FileWriter;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 
+/**
+ * User's code
+ */
 public class Main {
 
-    // Task 1 Word Count
+
+    /**
+     *  User defined Mapper function for Word Count Task
+     */
     public static class WordCountMapper implements Mapper {
 
         public void map(String key, String value, MapResultWriter writer) throws IOException {
@@ -23,6 +27,9 @@ public class Main {
         }
     }
 
+    /**
+     *  User defined Reducer function for Word Count Task
+     */
     public static class WordCountReducer implements Reducer {
 
         public void reduce(String key, ArrayList<String> values, ReduceResultWriter writer) throws IOException {
@@ -35,8 +42,10 @@ public class Main {
         }
     }
 
-    // Task 2 Get total sales for each date
 
+    /**
+     *  User defined Mapper function for Get total sales task
+     */
     public static class GetTotalSalesMapper implements Mapper{
         public void map(String key, String value, MapResultWriter writer) throws IOException {
             String[] words = value.split(" ");
@@ -48,6 +57,9 @@ public class Main {
         }
     }
 
+    /**
+     *  User defined Reducer function for Get total sales task
+     */
     public static class GetTotalSalesReducer implements Reducer {
 
         public void reduce(String key, ArrayList<String> values, ReduceResultWriter writer) throws IOException {
@@ -60,7 +72,9 @@ public class Main {
         }
     }
 
-    // Task 3 Calculate average price of a stock for given week prices for each day
+    /**
+     *  User defined Mapper function for Get average stock price task
+     */
     public static class GetAverageStockPriceMapper implements Mapper{
         public void map(String key, String value, MapResultWriter writer) throws IOException {
             String[] words = value.split(" ");
@@ -72,6 +86,9 @@ public class Main {
         }
     }
 
+    /**
+     *  User defined Reducer function for Get average stock price task
+     */
     public static class GetAverageStockPriceReducer implements Reducer {
 
         public void reduce(String key, ArrayList<String> values, ReduceResultWriter writer) throws IOException {
@@ -86,7 +103,9 @@ public class Main {
         }
     }
 
-    //Task 4 Search if a word exists
+    /**
+     *  User defined Mapper function for search word task
+     */
     public static class SearchWordMapper implements Mapper {
         public void map(String key, String value, MapResultWriter writer) throws IOException {
             String[] words = value.split(" ");
@@ -106,6 +125,9 @@ public class Main {
         }
     }
 
+    /**
+     *  User defined Reducer function for search word task
+     */
     public static class SearchWordReducer implements Reducer {
 
         public void reduce(String key, ArrayList<String> values, ReduceResultWriter writer) throws IOException {
@@ -124,21 +146,37 @@ public class Main {
         }
     }
 
+    /**
+     * Convenience method for user to run a task
+     * @param jobName
+     * @param config
+     * @param MapperCls
+     * @param ReducerCls
+     * @throws IOException
+     */
     public static void runTask(String jobName, String config, Class <? extends Mapper> MapperCls, Class<? extends Reducer> ReducerCls) throws IOException {
 
-        JobConf wordCountJobConfig = new JobConf( jobName, config);
-        Master masterClient = new Master();
+        JobConf wordCountJobConfig = new JobConf( jobName, config); // Load job config
+        Master masterClient = new Master(); // Start Master
         System.out.println("Master ID: " + masterClient.masterID);
 
         System.out.println("JobConfig ID: "+ wordCountJobConfig.jobID);
         System.out.println("Running Job: " + wordCountJobConfig.jobName);
-        wordCountJobConfig.setMapper(MapperCls);
-        wordCountJobConfig.setReducer(ReducerCls);
-        masterClient.setJobConfig(wordCountJobConfig);
-        masterClient.runJob();
+        wordCountJobConfig.setMapper(MapperCls);   // Set UDF Mapper function in job config
+        wordCountJobConfig.setReducer(ReducerCls);  // Set UDF Reducer function in job config
+        masterClient.setJobConfig(wordCountJobConfig);  // Set Job config for the master
+        masterClient.runJob();  // Master runs job based on job config
 
     }
 
+    /**
+     * Convenience method to test by deliberating failing a worker
+     * @param jobName
+     * @param config
+     * @param MapperCls
+     * @param ReducerCls
+     * @throws IOException
+     */
     public static void runTaskwithFailure(String jobName, String config, Class <? extends Mapper> MapperCls, Class<? extends Reducer> ReducerCls) throws IOException {
 
         JobConf wordCountJobConfig = new JobConf( jobName, config, "true");
@@ -155,67 +193,34 @@ public class Main {
     }
 
     public static void main(String[] args) throws InvocationTargetException, NoSuchMethodException, IllegalAccessException, InstantiationException, IOException, ClassNotFoundException {
+
+        // Run Word Count
         String wordCountConfig = Paths.get("resources", "configs", "wordCountConfig.properties").toString();
         runTask("WordCount", wordCountConfig, WordCountMapper.class, WordCountReducer.class);
 
+        // Run Word Count with failure
         runTaskwithFailure("WordCountFailure", wordCountConfig, WordCountMapper.class, WordCountReducer.class);
 
+        // Run get total sales
         String getTotalSalesConfig = Paths.get("resources", "configs", "getTotalSalesConfig.properties").toString();
         runTask("getTotalSales", getTotalSalesConfig, GetTotalSalesMapper.class, GetTotalSalesReducer.class);
+
+        // Run get total sales with failure
         runTaskwithFailure("getTotalSalesFailure", getTotalSalesConfig, GetTotalSalesMapper.class, GetTotalSalesReducer.class);
 
-
+        // Run get Average Stock Price
         String getAverageStockPriceConfig = Paths.get("resources", "configs", "getAverageStockPriceConfig.properties").toString();
         runTask("getAverageStockPrice", getAverageStockPriceConfig, GetAverageStockPriceMapper.class, GetAverageStockPriceReducer.class);
+
+        // Run get Average Stock Price with failure
         runTaskwithFailure("getAverageStockPriceFailure", getAverageStockPriceConfig, GetAverageStockPriceMapper.class, GetAverageStockPriceReducer.class);
 
-
+        // Run search word
         String searchWordConfig = Paths.get("resources", "configs", "searchWordConfig.properties").toString();
         runTask("searchWord", searchWordConfig, SearchWordMapper.class, SearchWordReducer.class);
+
+        // Run search word with failure
         runTaskwithFailure("searchWordFailure", searchWordConfig, SearchWordMapper.class, SearchWordReducer.class);
 
-
-
-
-
-//        Path wordCountConfig = Paths.get("resources", "configs", "wordCountConfig.properties");
-//        JobConf wordCountJobConfig = new JobConf( "WordCount", wordCountConfig.toString());
-//        Master masterClientWordCount = new Master();
-//        System.out.println("Master ID: " + masterClientWordCount.masterID);
-//
-//        System.out.println("JobConfig ID: "+ wordCountJobConfig.jobID);
-//        System.out.println("Running Job: " + wordCountJobConfig.jobName);
-//        wordCountJobConfig.setMapper(WordCountMapper.class);
-//        wordCountJobConfig.setReducer(WordCountReducer.class);
-//        masterClientWordCount.setJobConfig(wordCountJobConfig);
-//        masterClientWordCount.runJob();
-//
-//        Path getTotalSalesConfig = Paths.get("resources", "configs", "getTotalSalesConfig.properties");
-//        JobConf getTotalSalesJobConfig = new JobConf( "getTotalSales", getTotalSalesConfig.toString());
-//
-//        System.out.println("JobConfig ID: "+ getTotalSalesJobConfig.jobID);
-//        System.out.println("Running Job: " + getTotalSalesJobConfig.jobName);
-//        getTotalSalesJobConfig.setMapper(GetTotalSalesMapper.class);
-//        getTotalSalesJobConfig.setReducer(GetTotalSalesReducer.class);
-//        masterClient.setJobConfig(getTotalSalesJobConfig);
-//        masterClient.runJob();
-//
-//        Path getAverageStockPriceConfig = Paths.get("resources", "configs", "getAverageStockPriceConfig.properties");
-//        JobConf getAverageStockPriceJobConfig = new JobConf( "getAverageStockPrice", getAverageStockPriceConfig.toString());
-//        System.out.println("JobConfig ID: "+ getAverageStockPriceJobConfig.jobID);
-//        System.out.println("Running Job: " + getAverageStockPriceJobConfig.jobName);
-//        getAverageStockPriceJobConfig.setMapper(GetAverageStockPriceMapper.class);
-//        getAverageStockPriceJobConfig.setReducer(GetAverageStockPriceReducer.class);
-//        masterClient.setJobConfig(getAverageStockPriceJobConfig);
-//        masterClient.runJob();
-//
-//        Path searchWordConfig = Paths.get("resources", "configs", "searchWordConfig.properties");
-//        JobConf searchWordJobConfig = new JobConf( "searchWord", searchWordConfig.toString());
-//        System.out.println("JobConfig ID: "+ searchWordJobConfig.jobID);
-//        System.out.println("Running Job: " + searchWordJobConfig.jobName);
-//        searchWordJobConfig.setMapper(SearchWordMapper.class);
-//        searchWordJobConfig.setReducer(SearchWordReducer.class);
-//        masterClient.setJobConfig(searchWordJobConfig);
-//        masterClient.runJob();
     }
 }
