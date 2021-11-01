@@ -17,6 +17,7 @@ public class JobConf {
     public String outputFile;
     public Integer numWorkers;
     public String inputPartitionedFile;
+    public String deliberateFailure = "false";
 
     public Class<? extends Mapper> MapFunc;
     public Class<? extends Reducer> ReduceFunc;
@@ -37,6 +38,24 @@ public class JobConf {
         Path intermediateLoc = Paths.get("resources", "Intermediate_files");
         setIntermediateLocation(intermediateLoc.toString());
 
+
+    }
+    public JobConf(String jobName, String configFile, String deliberateFailure) throws IOException {
+        this.jobID =  UUID.randomUUID().toString();
+        this.jobName = jobName;
+        Properties prop = new Properties();
+
+        InputStream inputStream = new FileInputStream(configFile);
+        prop.load(inputStream);
+
+        this.numWorkers = Integer.parseInt(prop.getProperty("num_workers"));
+        setInputFile(prop.getProperty("inputFile"));
+        setOutputFile(prop.getProperty("outputFileDirectory"));
+
+        Path intermediateLoc = Paths.get("resources", "Intermediate_files");
+        setIntermediateLocation(intermediateLoc.toString());
+
+        this.deliberateFailure = deliberateFailure;
 
     }
 
