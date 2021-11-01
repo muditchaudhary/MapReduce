@@ -1,9 +1,10 @@
 package com.compsci532.mapreduce;
 
-public interface Mapper  {
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.ArrayList;
 
-    static String mapResult(String key, Object value){
-        String result = key + " "+ value + "\n";
-        return result;
-    }
+public interface Mapper  {
+    void map(String key, String value, MapResultWriter writer) throws IOException;
+
 }

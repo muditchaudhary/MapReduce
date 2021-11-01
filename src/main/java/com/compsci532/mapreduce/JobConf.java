@@ -3,6 +3,9 @@ package com.compsci532.mapreduce;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Properties;
 import java.util.UUID;
 
@@ -12,6 +15,8 @@ public class JobConf {
     public String inputFile;
     public String intermediateFile;
     public String outputFile;
+    public Integer numWorkers;
+    public String inputPartitionedFile;
 
     public Class<? extends Mapper> MapFunc;
     public Class<? extends Reducer> ReduceFunc;
@@ -24,9 +29,14 @@ public class JobConf {
 
         InputStream inputStream = new FileInputStream(configFile);
         prop.load(inputStream);
+
+        this.numWorkers = Integer.parseInt(prop.getProperty("num_workers"));
         setInputFile(prop.getProperty("inputFile"));
         setOutputFile(prop.getProperty("outputFileDirectory"));
-        setIntermediateFile("src/main/resources/Intermediate_files");
+
+        Path intermediateLoc = Paths.get("resources", "Intermediate_files");
+        setIntermediateLocation(intermediateLoc.toString());
+
 
     }
 
@@ -38,15 +48,24 @@ public class JobConf {
         this.ReduceFunc = ReduceFunc;
     }
 
-    public void setInputFile (String inputFile){
+    public void setInputFile (String inputFile) throws IOException {
+        //Will have to be changed when dynamically creating directories per job
         this.inputFile = inputFile;
+        Path inputPartitions = Paths.get("resources", "File_partitions",this.jobName);
+        Files.createDirectories(inputPartitions);
+        this.inputPartitionedFile = inputPartitions.toString();
     }
 
-    public void setOutputFile (String outputFile){
-        this.outputFile = outputFile+"/"+this.jobName+"_out.txt";
+    public void setOutputFile (String outputFile) throws IOException {
+        Path outputFileLocation = Paths.get(outputFile, this.jobName);
+        this.outputFile = outputFileLocation.toString();
+        Files.createDirectories(outputFileLocation);
     }
 
-    public void setIntermediateFile(String intermediateFile){
-        this.intermediateFile = intermediateFile+"/"+this.jobName+"_inter.txt";
+    public void setIntermediateLocation(String intermediateFile) throws IOException {
+
+        Path intermediateFileLocations = Paths.get(intermediateFile, this.jobName);
+        this.intermediateFile = intermediateFileLocations.toString();
+        Files.createDirectories(intermediateFileLocations);
     }
 }
