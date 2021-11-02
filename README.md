@@ -5,6 +5,11 @@
 * Pragyanta Dhal (SPIRE ID: 33069605)
 * Mudit Chaudhary (SPIRE ID: 32607978)
 
+For more information, please check the documentation document provided in ```docs/Documentation.pdf```.
+
+### IMPORTANT NOTE:
+The Inter-process communicator uses port 9997 on localhost. Please, keep that port free to run the program.
+
 ## How to run, compile and test
 
 To compile, run, and test you can run the given script:
@@ -13,18 +18,15 @@ To compile, run, and test you can run the given script:
 ```
 Alternatively, you can run the given commands in the script in command line
 ```bash
-$ rm -rf target
-$ mkdir target
-$ javac -sourcepath src -d target -cp lib/junit-platform-console-standalone-1.8.1.jar:. src/main/java/**/**/**/*.java src/test/java/*.java
-$ java -jar lib/junit-platform-console-standalone-1.8.1.jar --class-path target --scan-class-path
+$ rm -rf runMapReduceTest
+$ mkdir runMapReduceTest
+$ rm -rf resources/Intermediate_files/
+$ javac -sourcepath src -d runMapReduceTest -cp lib/junit-platform-console-standalone-1.8.1.jar:. src/main/java/**/**/**/*.java src/test/java/*.java
+$ java -jar lib/junit-platform-console-standalone-1.8.1.jar --class-path runMapReduceTest --scan-class-path
+$ rm -rf runMapReduceTest
 ```  
-If all the cases are passed, the following output should appear:
+If all the cases are passed, the following output should appear at the end:
 ```
-Running test job: ------------> WordCount
-Running test job: ------------> Search Word
-Running test job: ------------> Average Stock Price
-
-Thanks for using JUnit! Support its development at https://junit.org/sponsoring
 
 ╷
 ├─ JUnit Jupiter ✔
@@ -32,15 +34,15 @@ Thanks for using JUnit! Support its development at https://junit.org/sponsoring
    └─ TestMapReduce ✔
       ├─ getAverageStockPriceTest_N_MapperReducer ✔
       ├─ searchWordConfigTest_N_MapperReducer ✔
-      ├─ searchWordConfigTest_failedMapper ✔
-      ├─ getAverageStockPriceTest_failedMapper ✔
+      ├─ searchWordConfigTest_failedMapper 14113 ms ✔
+      ├─ getAverageStockPriceTest_failedMapper 14106 ms ✔
       ├─ wordCountTest_SingleMapperReducer ✔
       ├─ wordCountTest_N_MapperReducer ✔
       ├─ searchWordConfigTest_SingleMapperReducer ✔
       ├─ getAverageStockPriceTest_SingleMapperReducer ✔
-      └─ wordCountTest_failedMapper ✔
+      └─ wordCountTest_failedMapper 14094 ms ✔
 
-Test run finished after 34382 ms
+Test run finished after 54903 ms
 [         3 containers found      ]
 [         0 containers skipped    ]
 [         3 containers started    ]
@@ -54,9 +56,10 @@ Test run finished after 34382 ms
 [         9 tests successful      ]
 [         0 tests failed          ]
 
+
 ```
 
-The output of the tasks after running the task will be stored in `src/test/resources/Output_files`.  
+The output of the tasks after running the task will be stored in `resources/Output_files`.  
 
 ## Structure
 Our MapReduce library is available in `src/main/java/com/compsci532/mapreduce`.  
