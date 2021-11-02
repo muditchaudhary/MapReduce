@@ -44,35 +44,6 @@ public class Main {
 
 
     /**
-     *  User defined Mapper function for Get total sales task
-     */
-    public static class GetTotalSalesMapper implements Mapper{
-        public void map(String key, String value, MapResultWriter writer) throws IOException {
-            String[] words = value.split(" ");
-            String date = words[0];
-            String sale = words[words.length-1];
-
-            writer.writeResult(date, sale);
-
-        }
-    }
-
-    /**
-     *  User defined Reducer function for Get total sales task
-     */
-    public static class GetTotalSalesReducer implements Reducer {
-
-        public void reduce(String key, ArrayList<String> values, ReduceResultWriter writer) throws IOException {
-            Float sum = 0.00f;
-            for (String val : values){
-                sum+= Float.parseFloat(val);
-            }
-
-            writer.writeResult(key, sum);
-        }
-    }
-
-    /**
      *  User defined Mapper function for Get average stock price task
      */
     public static class GetAverageStockPriceMapper implements Mapper{
@@ -200,13 +171,6 @@ public class Main {
 
         // Run Word Count with failure
         runTaskwithFailure("WordCountFailure", wordCountConfig, WordCountMapper.class, WordCountReducer.class);
-
-        // Run get total sales
-        String getTotalSalesConfig = Paths.get("resources", "configs", "getTotalSalesConfig.properties").toString();
-        runTask("getTotalSales", getTotalSalesConfig, GetTotalSalesMapper.class, GetTotalSalesReducer.class);
-
-        // Run get total sales with failure
-        runTaskwithFailure("getTotalSalesFailure", getTotalSalesConfig, GetTotalSalesMapper.class, GetTotalSalesReducer.class);
 
         // Run get Average Stock Price
         String getAverageStockPriceConfig = Paths.get("resources", "configs", "getAverageStockPriceConfig.properties").toString();
