@@ -30,22 +30,28 @@ Thanks for using JUnit! Support its development at https://junit.org/sponsoring
 ├─ JUnit Jupiter ✔
 └─ JUnit Vintage ✔
    └─ TestMapReduce ✔
-      ├─ wordCountTest ✔
-      ├─ searchWordConfigTest ✔
-      └─ getAverageStockPriceTest ✔
+      ├─ getAverageStockPriceTest_N_MapperReducer ✔
+      ├─ searchWordConfigTest_N_MapperReducer ✔
+      ├─ searchWordConfigTest_failedMapper ✔
+      ├─ getAverageStockPriceTest_failedMapper ✔
+      ├─ wordCountTest_SingleMapperReducer ✔
+      ├─ wordCountTest_N_MapperReducer ✔
+      ├─ searchWordConfigTest_SingleMapperReducer ✔
+      ├─ getAverageStockPriceTest_SingleMapperReducer ✔
+      └─ wordCountTest_failedMapper ✔
 
-Test run finished after 107 ms
+Test run finished after 34382 ms
 [         3 containers found      ]
 [         0 containers skipped    ]
 [         3 containers started    ]
 [         0 containers aborted    ]
 [         3 containers successful ]
 [         0 containers failed     ]
-[         3 tests found           ]
+[         9 tests found           ]
 [         0 tests skipped         ]
-[         3 tests started         ]
+[         9 tests started         ]
 [         0 tests aborted         ]
-[         3 tests successful      ]
+[         9 tests successful      ]
 [         0 tests failed          ]
 
 ```
@@ -57,11 +63,11 @@ Our MapReduce library is available in `src/main/java/com/compsci532/mapreduce`.
 The user defined functions are available in `src/main/java/com/compsci532/usercode`.
 
 ## Config format
-The config files (e.g., for testing) are available in `src/test/resources/configs`
+The config files (e.g., for testing) are available in `resources/test_configs`
 The config file can follow the following example:  
 ```properties
-inputFile=src/test/resources/Input_files/getAverageStockPrice.txt
-outputFileDirectory=src/test/resources/Output_files/
+inputFile=resources/Input_files/getAverageStockPrice.txt
+outputFileDirectory=resources/Output_files/
 num_workers=1
 
 # sparkOutputFile property is only for testing config
