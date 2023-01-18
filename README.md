@@ -1,4 +1,4 @@
-# Team EB29 Map Reduce Implementation
+# MapReduce Implementation
 
 ## Group Members
 * Ayushe Gangal (SPIRE ID: 33018381)
